@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/asibilia/commit/compare/v1.0.5...v1.0.6) (2025-07-07)
+
+
+### Bug Fixes
+
+* **repo:** update readme ([715814e](https://github.com/asibilia/commit/commit/715814ea5a4bdacfdda871be89d66e1fa34a8f9a))
+
 ## [1.0.5](https://github.com/asibilia/commit/compare/v1.0.4...v1.0.5) (2025-07-07)
 
 
