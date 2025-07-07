@@ -1,0 +1,173 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Configure NPM Package Distribution",
+        "description": "Set up the package.json with proper binary entry points and TypeScript build process for distribution as an NPM package.",
+        "details": "1. Update package.json with:\n   - Add 'bin' field: `{ \"commit\": \"./dist/index.js\" }`\n   - Configure 'files' array to include only necessary files: `[\"dist\", \"README.md\", \"LICENSE\"]`\n   - Add 'engines' field to specify Node.js compatibility: `{ \"node\": \">=16\" }`\n   - Set up 'exports' field for dual ESM/CommonJS support:\n```json\n\"exports\": {\n  \".\": {\n    \"import\": \"./dist/esm/index.js\",\n    \"require\": \"./dist/cjs/index.js\"\n  }\n}\n```\n2. Configure TypeScript build:\n   - Update tsconfig.json for declaration file generation: `{ \"declaration\": true }`\n   - Create build script using `tsc` with multiple targets\n   - Add shebang to entry file: `#!/usr/bin/env node`\n3. Set up build scripts in package.json:\n```json\n\"scripts\": {\n  \"build\": \"npm run build:esm && npm run build:cjs\",\n  \"build:esm\": \"tsc --module ESNext --outDir dist/esm\",\n  \"build:cjs\": \"tsc --module CommonJS --outDir dist/cjs\"\n}\n```\n4. Ensure executable permissions: `chmod +x dist/index.js`\n5. Test the package locally with `npm link`",
+        "testStrategy": "1. Verify the package can be installed globally with `npm i -g .`\n2. Test running the command with `commit` after global installation\n3. Verify the package can be run with `npx` and `bunx`\n4. Test importing the package in both ESM and CommonJS projects\n5. Verify TypeScript declaration files are correctly generated and usable",
+        "priority": "high",
+        "dependencies": [],
+        "status": "in-progress",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Implement Command-Line Argument Parsing",
+        "description": "Add support for command-line arguments including help and version flags with proper documentation.",
+        "details": "1. Use a lightweight argument parsing library like 'commander' (v11.x) or 'yargs' (v17.x)\n2. Implement the following commands and flags:\n   - `--help` or `-h`: Display help information\n   - `--version` or `-v`: Display version information\n   - `--config` or `-c`: Specify custom config file path\n   - `--dry-run`: Show the commit message without executing git commands\n\n```typescript\nimport { Command } from 'commander';\n\nconst program = new Command();\nprogram\n  .name('commit')\n  .description('Interactive CLI tool for standardized commit messages')\n  .version(packageJson.version)\n  .option('-c, --config <path>', 'specify custom config file path')\n  .option('--dry-run', 'show commit message without executing git commands')\n  .parse(process.argv);\n\nconst options = program.opts();\n```\n\n3. Create a help display function that shows usage examples\n4. Add validation for command-line arguments\n5. Implement graceful error handling for invalid arguments",
+        "testStrategy": "1. Test each command-line flag individually\n2. Test combinations of flags\n3. Test with invalid arguments and verify error handling\n4. Verify help output contains all necessary information\n5. Test version output matches package.json version",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Enhance Configuration System",
+        "description": "Improve the configuration system to support multiple file formats and implement configuration discovery and validation.",
+        "details": "1. Support multiple configuration file formats:\n   - TypeScript (commit.config.ts)\n   - JavaScript (commit.config.js)\n   - JSON (commit.config.json)\n   - YAML (commit.config.yaml, commit.config.yml)\n   - package.json (\"commit\" field)\n\n2. Implement configuration discovery in the following order:\n   - Command line specified config (--config)\n   - Local project config files (current directory)\n   - package.json \"commit\" field\n   - Global user config (~/.commit/config.*)\n   - Default built-in config\n\n3. Use cosmiconfig (v8.x) for configuration discovery:\n```typescript\nimport { cosmiconfigSync } from 'cosmiconfig';\n\nconst explorer = cosmiconfigSync('commit', {\n  searchPlaces: [\n    'commit.config.ts',\n    'commit.config.js',\n    'commit.config.json',\n    'commit.config.yaml',\n    'commit.config.yml',\n    'package.json'\n  ],\n  loaders: {\n    '.ts': tsLoader, // Custom loader for TypeScript\n    '.js': defaultLoader,\n    '.json': jsonLoader,\n    '.yaml': yamlLoader,\n    '.yml': yamlLoader\n  }\n});\n\nconst result = explorer.search();\n```\n\n4. Implement configuration merging with proper precedence\n5. Enhance Zod schema validation with detailed error messages\n6. Create example configurations for common project types",
+        "testStrategy": "1. Test configuration discovery with various file formats\n2. Test configuration merging and precedence rules\n3. Verify validation errors provide helpful messages\n4. Test loading configurations from different locations\n5. Test with invalid configurations and verify error handling",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Improve Git Integration and Error Handling",
+        "description": "Enhance git operations with better error handling, validation, and recovery mechanisms.",
+        "details": "1. Implement robust git command execution:\n```typescript\nimport { execa } from 'execa';\n\nasync function executeGitCommand(args: string[]): Promise<string> {\n  try {\n    const { stdout } = await execa('git', args);\n    return stdout.trim();\n  } catch (error) {\n    // Enhanced error handling\n    if (error.stderr.includes('not a git repository')) {\n      throw new Error('Not a git repository. Please run this command in a git repository.');\n    }\n    throw new Error(`Git error: ${error.stderr || error.message}`);\n  }\n}\n```\n\n2. Add validation checks before git operations:\n   - Check if current directory is a git repository\n   - Verify git is installed and accessible\n   - Check if there are changes to commit\n   - Validate remote exists before push\n\n3. Implement graceful recovery mechanisms:\n   - Save commit message to temporary file if operation fails\n   - Provide recovery instructions on failure\n\n4. Add network error handling for push operations\n5. Implement timeout handling for git operations\n6. Add detailed logging for git operations with debug mode",
+        "testStrategy": "1. Test git operations in various repository states\n2. Test error handling for common git errors\n3. Test recovery mechanisms after failures\n4. Mock network failures for push operations\n5. Test with invalid git configurations\n6. Verify helpful error messages are displayed",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Set Up Testing Infrastructure",
+        "description": "Establish a comprehensive testing framework using Bun test for unit, integration, and mock tests.",
+        "details": "1. Set up Bun test framework with TypeScript support:\n```json\n// package.json\n{\n  \"scripts\": {\n    \"test\": \"bun test\",\n    \"test:coverage\": \"bun test --coverage\"\n  }\n}\n```\n\n2. Create test directory structure:\n```\n/tests\n  /unit        # Unit tests\n  /integration # Integration tests\n  /mocks       # Mock data and functions\n  /fixtures    # Test fixtures\n```\n\n3. Implement mock system for user input using @clack/prompts:\n```typescript\n// tests/mocks/prompts.ts\nimport * as prompts from '@clack/prompts';\n\nexport function mockPrompts(responses: Record<string, any>) {\n  // Mock implementation\n}\n```\n\n4. Create mock git environment for testing git operations\n5. Implement test utilities for configuration testing\n6. Set up test coverage reporting with minimum threshold of 90%",
+        "testStrategy": "1. Verify test framework runs correctly\n2. Test the mock system with sample tests\n3. Verify coverage reporting works correctly\n4. Test the test utilities themselves\n5. Ensure tests can run in CI environment",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement Unit Tests",
+        "description": "Create comprehensive unit tests for core functionality including configuration parsing, validation, and utility functions.",
+        "details": "1. Write unit tests for configuration validation:\n```typescript\nimport { expect, test, describe } from 'bun:test';\nimport { validateConfig } from '../src/config';\n\ndescribe('Configuration Validation', () => {\n  test('validates correct configuration', () => {\n    const validConfig = { /* valid config object */ };\n    expect(() => validateConfig(validConfig)).not.toThrow();\n  });\n  \n  test('rejects invalid configuration', () => {\n    const invalidConfig = { /* invalid config object */ };\n    expect(() => validateConfig(invalidConfig)).toThrow();\n  });\n});\n```\n\n2. Write unit tests for commit message formatting\n3. Test utility functions in isolation\n4. Test command-line argument parsing\n5. Test configuration discovery and merging\n6. Test error handling functions",
+        "testStrategy": "1. Aim for >90% code coverage for unit tests\n2. Test both success and failure cases\n3. Test edge cases and boundary conditions\n4. Use parameterized tests for multiple input variations\n5. Verify error messages are as expected",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement Integration Tests",
+        "description": "Create integration tests that verify the end-to-end functionality of the CLI tool with git operations.",
+        "details": "1. Set up integration test environment with temporary git repositories:\n```typescript\nimport { expect, test, describe, beforeEach, afterEach } from 'bun:test';\nimport { execa } from 'execa';\nimport { mkdtemp, writeFile } from 'fs/promises';\nimport { join } from 'path';\nimport { tmpdir } from 'os';\n\ndescribe('Git Integration', () => {\n  let tempDir: string;\n  \n  beforeEach(async () => {\n    tempDir = await mkdtemp(join(tmpdir(), 'commit-test-'));\n    // Initialize git repo\n    await execa('git', ['init'], { cwd: tempDir });\n    await execa('git', ['config', 'user.name', 'Test User'], { cwd: tempDir });\n    await execa('git', ['config', 'user.email', 'test@example.com'], { cwd: tempDir });\n  });\n  \n  afterEach(async () => {\n    // Clean up\n    await execa('rm', ['-rf', tempDir]);\n  });\n  \n  test('commits changes successfully', async () => {\n    // Test implementation\n  });\n});\n```\n\n2. Test the full commit workflow with mocked user input\n3. Test configuration loading from different file formats\n4. Test auto-add and auto-push functionality\n5. Test error scenarios like no changes to commit\n6. Test with various git repository states",
+        "testStrategy": "1. Create isolated test environments for each test\n2. Mock user input to simulate interactive prompts\n3. Verify git commands are executed correctly\n4. Check git history after operations\n5. Test with different configuration options",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Set Up CI/CD Pipeline",
+        "description": "Establish a continuous integration and deployment pipeline using GitHub Actions for testing, linting, and publishing.",
+        "details": "1. Create GitHub Actions workflow for testing:\n```yaml\n# .github/workflows/test.yml\nname: Test\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        node-version: [16.x, 18.x, 20.x]\n    steps:\n      - uses: actions/checkout@v3\n      - uses: oven-sh/setup-bun@v1\n        with:\n          bun-version: latest\n      - run: bun install\n      - run: bun run lint\n      - run: bun test --coverage\n```\n\n2. Create workflow for publishing to npm:\n```yaml\n# .github/workflows/publish.yml\nname: Publish\n\non:\n  release:\n    types: [created]\n\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - uses: oven-sh/setup-bun@v1\n        with:\n          bun-version: latest\n      - run: bun install\n      - run: bun test\n      - run: bun run build\n      - uses: JS-DevTools/npm-publish@v1\n        with:\n          token: ${{ secrets.NPM_TOKEN }}\n```\n\n3. Add ESLint and Prettier for code quality checks\n4. Set up dependency scanning with Dependabot\n5. Configure cross-platform testing (Windows, macOS, Linux)\n6. Add status badges to README.md",
+        "testStrategy": "1. Test the CI workflow locally using act\n2. Verify all jobs complete successfully\n3. Test with different Node.js versions\n4. Verify code quality checks are enforced\n5. Test the release process with a dry run",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          6,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Release and Versioning Process",
+        "description": "Set up automated versioning, changelog generation, and release process based on conventional commits.",
+        "details": "1. Set up semantic release for automated versioning:\n```json\n// package.json\n{\n  \"devDependencies\": {\n    \"@semantic-release/changelog\": \"^6.0.3\",\n    \"@semantic-release/git\": \"^10.0.1\",\n    \"semantic-release\": \"^21.0.7\"\n  },\n  \"release\": {\n    \"branches\": [\"main\"],\n    \"plugins\": [\n      \"@semantic-release/commit-analyzer\",\n      \"@semantic-release/release-notes-generator\",\n      \"@semantic-release/changelog\",\n      \"@semantic-release/npm\",\n      \"@semantic-release/git\",\n      \"@semantic-release/github\"\n    ]\n  }\n}\n```\n\n2. Configure commit analyzer to determine version bumps:\n   - feat: minor version bump\n   - fix: patch version bump\n   - BREAKING CHANGE: major version bump\n\n3. Set up changelog generation based on commit messages\n4. Configure GitHub release creation with release notes\n5. Implement npm publishing on version tags\n6. Add version badge to README.md",
+        "testStrategy": "1. Test the release process with a dry run\n2. Verify version bumping based on commit types\n3. Check changelog generation for different commit types\n4. Test GitHub release creation\n5. Verify npm publishing process",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Create Comprehensive Documentation",
+        "description": "Develop detailed documentation including README, usage examples, configuration options, and contributing guidelines.",
+        "details": "1. Create a comprehensive README.md with:\n   - Project description and badges\n   - Installation instructions\n   - Usage examples\n   - Configuration options\n   - Command-line arguments\n   - Screenshots/GIFs of the tool in action\n\n2. Create a CONTRIBUTING.md with:\n   - Development setup instructions\n   - Code style guidelines\n   - Pull request process\n   - Issue reporting guidelines\n\n3. Add configuration examples for different project types:\n   - JavaScript/TypeScript projects\n   - React/Vue/Angular projects\n   - Node.js backend projects\n   - Monorepo configurations\n\n4. Create a LICENSE file (MIT recommended)\n5. Add API documentation for configuration options\n6. Create a documentation website using GitHub Pages (optional)",
+        "testStrategy": "1. Verify all links in documentation work\n2. Test installation instructions on different platforms\n3. Have team members review documentation for clarity\n4. Test configuration examples in real projects\n5. Verify all command-line arguments are documented",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Performance Optimization",
+        "description": "Optimize the CLI tool for fast startup time, minimal memory footprint, and responsive interactive prompts.",
+        "details": "1. Measure and optimize startup time:\n   - Use `performance.now()` to measure startup time\n   - Implement lazy loading for non-critical modules\n   - Optimize import statements\n\n2. Reduce dependency footprint:\n   - Audit dependencies for size and necessity\n   - Consider bundling with esbuild or similar\n   - Use tree-shaking to eliminate unused code\n\n3. Optimize git operations:\n   - Batch git commands where possible\n   - Use spawn instead of exec for better performance\n   - Implement caching for repeated operations\n\n4. Profile memory usage:\n   - Use `process.memoryUsage()` to measure memory consumption\n   - Fix memory leaks if found\n   - Optimize large data structures\n\n5. Implement performance tests to ensure startup time < 500ms",
+        "testStrategy": "1. Measure startup time with and without optimizations\n2. Compare bundle size before and after optimization\n3. Test memory usage with different repository sizes\n4. Benchmark git operations performance\n5. Test on low-end hardware to ensure good performance",
+        "priority": "low",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Cross-Platform Compatibility",
+        "description": "Ensure the CLI tool works consistently across Windows, macOS, and Linux with proper path handling and command execution.",
+        "details": "1. Implement cross-platform path handling:\n```typescript\nimport { join, resolve } from 'path';\n\n// Use path.join for concatenating paths\nconst configPath = join(process.cwd(), 'commit.config.js');\n\n// Use path.resolve for absolute paths\nconst absolutePath = resolve(configPath);\n```\n\n2. Handle platform-specific git command execution:\n```typescript\nimport { platform } from 'os';\n\nconst isWindows = platform() === 'win32';\nconst gitCommand = isWindows ? 'git.exe' : 'git';\n```\n\n3. Test file permissions handling on different platforms\n4. Implement proper line ending handling (CRLF vs LF)\n5. Test terminal color support across platforms\n6. Handle home directory resolution for config files:\n```typescript\nimport { homedir } from 'os';\n\nconst userConfigPath = join(homedir(), '.commit', 'config.js');\n```",
+        "testStrategy": "1. Test on Windows, macOS, and Linux environments\n2. Verify file path handling works correctly on all platforms\n3. Test git operations on different platforms\n4. Verify terminal output is consistent across platforms\n5. Test with different terminal emulators",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-07T12:52:12.368Z",
+      "updated": "2025-07-07T13:05:56.061Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

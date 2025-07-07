@@ -1,28 +1,54 @@
 {
   "name": "commit",
+  "description": "Interactive CLI tool for creating standardized commit messages with customizable types and scopes",
+  "version": "1.0.0",
+  "author": "Your Name <your.email@example.com>",
+  "bin": {
+    "commit": "./dist/commit"
+  },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
-    "chalk": "^5.4.1",
-    "zod": "^3.25.20"
+    "@clack/prompts": "^0.8.2",
+    "chalk": "^5.3.0",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
     "@types/bun": "latest",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@typescript-eslint/parser": "^8.32.1",
-    "eslint": "^9.27.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.4.0",
-    "prettier": "^3.3.3",
-    "syncpack": "^13.0.4",
-    "typescript-eslint": "^8.32.1"
+    "typescript": "^5.7.3"
   },
-  "module": "main.ts",
-  "peerDependencies": {
-    "typescript": "^5"
+  "engines": {
+    "bun": ">=1.0.0"
   },
-  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/commit"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "bun",
+    "cli",
+    "commit",
+    "conventional-commits",
+    "git",
+    "interactive",
+    "typescript"
+  ],
+  "license": "MIT",
+  "main": "./dist/commit",
   "scripts": {
-    "commit": "bun run main.ts"
-  }
+    "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile ./dist/commit",
+    "build:dev": "bun build --compile ./src/index.ts --outfile ./dist/commit",
+    "clean": "rm -rf dist",
+    "dev": "bun run src/index.ts",
+    "format": "bun run prettier --write src/**/*.ts",
+    "lint": "bun run eslint src/**/*.ts",
+    "prepublishOnly": "bun run clean && bun run build",
+    "test": "bun test"
+  },
+  "type": "module"
 }

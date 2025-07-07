@@ -1,0 +1,165 @@
+# Commit CLI Tool - Product Requirements Document
+
+## Project Overview
+
+A simple, interactive CLI tool that helps developers create standardized commit messages using customizable types and scopes. The tool can be run globally via `npx` or `bunx` and supports local configuration for project-specific customization.
+
+## Current State
+
+The project has core functionality implemented:
+- Interactive prompts using @clack/prompts for type, scope, and message selection
+- Zod-based configuration schema with default types and scopes
+- Auto-add and auto-push git functionality
+- Colored terminal output with chalk
+- TypeScript support with proper typing
+
+## Target Users
+
+- Frontend/backend developers who want consistent commit messages
+- Teams that follow conventional commit standards
+- Open source maintainers who need structured commit history
+- Individual developers who want to improve their git workflow
+
+## Core Features (Existing)
+
+1. **Interactive Commit Flow**
+   - Type selection (feat, fix, chore, etc.)
+   - Scope selection (component, page, server, etc.) 
+   - Custom commit message input with validation
+   - Formatted output following conventional commit format
+
+2. **Configuration System**
+   - Zod schema validation for type safety
+   - Default types and scopes provided
+   - Git workflow options (auto_add_all, auto_push)
+   - Local project configuration via commit.config.ts
+
+3. **Git Integration**
+   - Automatic staging of changes (optional)
+   - Commit execution with formatted message
+   - Automatic push to remote (optional)
+   - Error handling for git operations
+
+## Missing Features & Requirements
+
+### 1. NPM Package Distribution
+- Configure package.json with proper binary entry point
+- Set up TypeScript build process for distribution
+- Create proper module exports for both ESM and CommonJS
+- Generate TypeScript declaration files (.d.ts)
+- Configure files to include in NPM package
+
+### 2. CLI Enhancement
+- Add command-line argument parsing (help, version flags)
+- Support for --help and --version commands
+- Better error handling for edge cases:
+  - No git repository detected
+  - No changes to commit
+  - Invalid configuration files
+- Improved input validation and sanitization
+
+### 3. Testing Infrastructure
+- Set up bun test framework
+- Unit tests for configuration parsing
+- Integration tests for git operations
+- Mock tests for user input scenarios
+- Error handling test cases
+- Configuration validation tests
+
+### 4. Release & Versioning Process
+- Automated versioning with conventional changelog
+- Release workflow using GitHub Actions or similar
+- Automated NPM publishing on version tags
+- Semantic versioning based on commit types
+- Changelog generation from commit history
+
+### 5. Documentation & Examples
+- Comprehensive README with installation and usage instructions
+- Configuration examples for different project types
+- API documentation for configuration options
+- Contributing guidelines
+- License specification
+
+### 6. CI/CD Pipeline
+- Automated testing on pull requests
+- Linting and code quality checks
+- Build verification before release
+- Security scanning for dependencies
+- Cross-platform testing (Node.js versions)
+
+### 7. Configuration Improvements
+- Support for multiple configuration file formats (.js, .json, .yaml)
+- Configuration file discovery (package.json, dedicated config files)
+- Global vs local configuration precedence
+- Configuration validation with helpful error messages
+- Example configurations for common project types
+
+### 8. Error Handling & Robustness
+- Graceful handling of git command failures
+- Network error handling for push operations
+- Interrupted workflow recovery
+- Clear error messages with suggested solutions
+- Logging options for debugging
+
+## Technical Requirements
+
+### Build & Distribution
+- TypeScript compilation to JavaScript for NPM distribution
+- Proper package.json configuration with bin field
+- ESM module format for modern Node.js compatibility
+- Bundling strategy for dependencies
+- Cross-platform compatibility (Windows, macOS, Linux)
+
+### Dependencies
+- Maintain minimal dependency footprint
+- Use peer dependencies where appropriate
+- Regular security updates for dependencies
+- License compatibility verification
+
+### Performance
+- Fast startup time (< 500ms)
+- Responsive interactive prompts
+- Efficient git command execution
+- Minimal memory footprint
+
+## Success Criteria
+
+1. **Distribution Success**
+   - Package can be run via `npx commit` or `bunx commit`
+   - Installation works on major Node.js versions (16+)
+   - Zero-config experience with sensible defaults
+
+2. **Developer Experience**
+   - Intuitive configuration system
+   - Clear error messages and guidance
+   - Fast, responsive CLI interaction
+   - Comprehensive documentation
+
+3. **Code Quality**
+   - >90% test coverage
+   - All tests passing in CI
+   - Clean, maintainable codebase
+   - Proper TypeScript typing throughout
+
+4. **Release Process**
+   - Automated versioning and publishing
+   - Reliable release pipeline
+   - Proper semantic versioning
+   - Generated changelogs
+
+## Out of Scope (v1)
+
+- GUI interface
+- Git hooks integration
+- Team collaboration features
+- Advanced commit message templates
+- Integration with specific git hosting platforms
+- AI-powered commit message generation
+
+## Future Considerations
+
+- Plugin system for custom commit types
+- Integration with popular development tools
+- Team configuration sharing
+- Commit message linting
+- Integration with issue tracking systems 
