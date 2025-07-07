@@ -16,14 +16,87 @@
         "id": 2,
         "title": "Implement Command-Line Argument Parsing",
         "description": "Add support for command-line arguments including help and version flags with proper documentation.",
-        "details": "1. Use a lightweight argument parsing library like 'commander' (v11.x) or 'yargs' (v17.x)\n2. Implement the following commands and flags:\n   - `--help` or `-h`: Display help information\n   - `--version` or `-v`: Display version information\n   - `--config` or `-c`: Specify custom config file path\n   - `--dry-run`: Show the commit message without executing git commands\n\n```typescript\nimport { Command } from 'commander';\n\nconst program = new Command();\nprogram\n  .name('commit')\n  .description('Interactive CLI tool for standardized commit messages')\n  .version(packageJson.version)\n  .option('-c, --config <path>', 'specify custom config file path')\n  .option('--dry-run', 'show commit message without executing git commands')\n  .parse(process.argv);\n\nconst options = program.opts();\n```\n\n3. Create a help display function that shows usage examples\n4. Add validation for command-line arguments\n5. Implement graceful error handling for invalid arguments",
-        "testStrategy": "1. Test each command-line flag individually\n2. Test combinations of flags\n3. Test with invalid arguments and verify error handling\n4. Verify help output contains all necessary information\n5. Test version output matches package.json version",
-        "priority": "high",
+        "status": "done",
         "dependencies": [
           1
         ],
-        "status": "pending",
-        "subtasks": []
+        "priority": "high",
+        "details": "1. Use commander library (v14.0.0) for robust argument parsing\n2. Implement the following commands and flags:\n   - `--help` or `-h`: Display help information\n   - `--version` or `-V`: Display version information\n   - `--config` or `-c`: Specify custom config file path\n   - `--dry-run`: Show the commit message without executing git commands\n\n```typescript\nimport { Command } from 'commander';\n\nconst program = new Command();\nprogram\n  .name('commit')\n  .description('Interactive CLI tool for standardized commit messages')\n  .version(packageJson.version)\n  .option('-c, --config <path>', 'specify custom config file path')\n  .option('--dry-run', 'show commit message without executing git commands')\n  .parse(process.argv);\n\nconst options = program.opts();\n```\n\n3. Create a help display function that shows usage examples\n4. Add validation for command-line arguments\n5. Implement graceful error handling for invalid arguments and missing config files\n6. Provide clear visual feedback for all operations\n7. Ensure commit message preview shows before execution in both normal and dry-run modes",
+        "testStrategy": "1. Test each command-line flag individually\n2. Test combinations of flags\n3. Test with invalid arguments and verify error handling\n4. Verify help output contains all necessary information\n5. Test version output matches package.json version (1.0.0)\n6. Test custom config path handling with both valid and invalid paths\n7. Verify dry-run mode shows commit message without executing git commands\n8. Ensure interactive prompts work correctly with the argument system",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and configure commander library v14.0.0",
+            "description": "Add commander as a dependency and set up basic CLI structure",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement required command flags",
+            "description": "Add support for --help/-h, --version/-V, --config/-c, and --dry-run flags",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Create help display with usage examples",
+            "description": "Implement comprehensive help output showing all available options",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement config file path validation",
+            "description": "Add error handling for missing or invalid config files",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement dry-run mode",
+            "description": "Show commit message preview without executing git commands",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 6,
+            "title": "Add commit message preview",
+            "description": "Display commit message before execution in both normal and dry-run modes",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 7,
+            "title": "Enhance git operation feedback",
+            "description": "Add descriptive status messages for git operations",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          },
+          {
+            "id": 8,
+            "title": "Verify integration with interactive prompts",
+            "description": "Ensure CLI arguments work seamlessly with existing interactive functionality",
+            "status": "done",
+            "dependencies": [],
+            "details": "",
+            "testStrategy": ""
+          }
+        ]
       },
       {
         "id": 3,
@@ -166,7 +239,7 @@
     ],
     "metadata": {
       "created": "2025-07-07T12:52:12.368Z",
-      "updated": "2025-07-07T13:19:33.344Z",
+      "updated": "2025-07-07T13:48:11.113Z",
       "description": "Tasks for master context"
     }
   }

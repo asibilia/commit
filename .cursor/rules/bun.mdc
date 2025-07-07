@@ -1,0 +1,174 @@
+---
+description: Prefer Bun runtime methods and APIs over Node.js equivalents
+globs: src/**/*.ts, src/**/*.js, *.ts, *.js
+alwaysApply: false
+---
+
+# Bun Runtime Preferences
+
+This project uses **Bun** as the JavaScript runtime and should leverage Bun-specific APIs and methods over Node.js equivalents for better performance and compatibility.
+
+## **File System Operations**
+
+- **✅ DO: Use Bun.file() for file operations**
+
+  ```typescript
+  // Preferred: Bun.file() API
+  const file = Bun.file('./config.json')
+  const content = await file.text()
+  const data = await file.json()
+  
+  // For writing files
+  await Bun.write('./output.txt', 'content')
+  await Bun.write('./data.json', { key: 'value' })
+  ```
+
+- **❌ DON'T: Use Node.js fs methods when Bun alternatives exist**
+
+  ```typescript
+  // Avoid: Node.js fs methods
+  import { readFileSync, writeFileSync } from 'fs'
+  const content = readFileSync('./config.json', 'utf-8')
+  writeFileSync('./output.txt', 'content')
+  ```
+
+## **Process Execution**
+
+- **✅ DO: Use Bun.spawn() for subprocess execution**
+
+  ```typescript
+  // Preferred: Bun.spawn()
+  const process = Bun.spawn(['git', 'commit', '-m', message])
+  await process.exited
+  
+  // Get output
+  const output = await new Response(process.stdout).text()
+  const errorOutput = await new Response(process.stderr).text()
+  ```
+
+- **❌ DON'T: Use Node.js child_process when Bun.spawn() is sufficient**
+
+  ```typescript
+  // Avoid: Node.js child_process
+  import { spawn, exec } from 'child_process'
+  const child = spawn('git', ['commit', '-m', message])
+  ```
+
+## **HTTP Requests**
+
+- **✅ DO: Use Bun's built-in fetch() and Request/Response APIs**
+
+  ```typescript
+  // Preferred: Native fetch in Bun
+  const response = await fetch('https://api.example.com/data')
+  const data = await response.json()
+  
+  // For servers
+  export default {
+    port: 3000,
+    fetch(request) {
+      return new Response('Hello Bun!')
+    }
+  }
+  ```
+
+## **Package Management**
+
+- **✅ DO: Use `bun add` and `bun remove` for dependencies**
+
+  ```bash
+  # Preferred: Bun package manager
+  bun add commander
+  bun add -d @types/node
+  bun remove old-package
+  ```
+
+- **❌ DON'T: Use npm or yarn unless specifically needed**
+
+  ```bash
+  # Avoid: Other package managers
+  npm install commander
+  yarn add commander
+  ```
+
+## **Build and Execution Scripts**
+
+- **✅ DO: Use `bun run` and `bun build` commands**
+
+  ```json
+  // package.json scripts
+  {
+    "scripts": {
+      "dev": "bun run src/index.ts",
+      "build": "bun build --compile --minify ./src/index.ts --outfile ./dist/commit",
+      "test": "bun test"
+    }
+  }
+  ```
+
+## **Path Resolution**
+
+- **✅ DO: Use `import.meta.dir` for current directory**
+
+  ```typescript
+  // Preferred: Bun-specific import.meta
+  const packagePath = resolve(import.meta.dir, '../package.json')
+  
+  // Check if running as main module
+  if (import.meta.main) {
+    main()
+  }
+  ```
+
+- **❌ DON'T: Use Node.js `__dirname` when import.meta.dir is available**
+
+  ```typescript
+  // Avoid: Node.js globals
+  const packagePath = resolve(__dirname, '../package.json')
+  ```
+
+## **Environment and Configuration**
+
+- **✅ DO: Use Bun's built-in environment handling**
+
+  ```typescript
+  // Preferred: Direct access to process.env
+  const isDev = process.env.NODE_ENV === 'development'
+  
+  // Bun automatically loads .env files
+  const apiKey = process.env.API_KEY
+  ```
+
+## **Testing**
+
+- **✅ DO: Use `bun test` with built-in test runner**
+
+  ```typescript
+  // test/example.test.ts
+  import { expect, test } from 'bun:test'
+  
+  test('should work correctly', () => {
+    expect(1 + 1).toBe(2)
+  })
+  ```
+
+## **Performance Benefits**
+
+- **Bun is significantly faster** for file I/O, package installation, and JavaScript execution
+- **Native TypeScript support** eliminates need for separate compilation step
+- **Built-in bundler** provides faster builds than webpack/rollup
+- **Hot reloading** is built-in for development
+
+## **When Node.js Methods Are Acceptable**
+
+- When interfacing with libraries that explicitly require Node.js APIs
+- For compatibility with existing tooling that hasn't adopted Bun yet
+- When Bun doesn't provide a direct equivalent (rare cases)
+
+Remember: **Bun is designed to be a drop-in replacement for Node.js** with better performance, so prefer Bun-native methods when available.
+
+- When interfacing with libraries that explicitly require Node.js APIs
+- For compatibility with existing tooling that hasn't adopted Bun yet
+- When Bun doesn't provide a direct equivalent (rare cases)
+
+Remember: **Bun is designed to be a drop-in replacement for Node.js** with better performance, so prefer Bun-native methods when available.
