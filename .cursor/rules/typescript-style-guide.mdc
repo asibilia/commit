@@ -1,0 +1,805 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This style guide outlines key conventions for writing clean, consistent, and maintainable TypeScript and TSX code in this project.
+
+## 1. Function Signatures: Prefer Single Object Argument
+
+**Rule:** Functions should accept a single object as an argument, which is then destructured, rather than multiple positional arguments.
+
+**Why This Is Important:**
+
+* **Readability:** Argument names are explicit at the call site, making the code easier to understand without needing to check the function definition.
+* **Maintainability:** Adding, removing, or reordering arguments becomes trivial and less error-prone. You won't break existing calls by adding a new optional property.
+* **Consistency:** This pattern aligns with modern practices seen in libraries like React (props) and many of the Supabase client methods.
+
+---
+
+### Examples
+
+**✅ DO: Use a single, destructured object argument.**
+
+```typescript
+// Function Definition
+function createPlayer({
+    full_name,
+    country,
+    is_active = true,
+}: {
+    full_name: string;
+    country: string;
+    is_active?: boolean;
+}) {
+    // ... function logic
+}
+
+// Function Call
+createPlayer({
+    full_name: 'Scottie Scheffler',
+    country: 'USA',
+});
+```
+
+**❌ DON'T: Use multiple positional arguments.**
+
+```typescript
+// Function Definition
+function createPlayer(fullName: string, country: string, isActive: boolean = true) {
+    // ... function logic
+}
+
+// Function Call (less clear what 'USA' and 'true' represent)
+createPlayer('Scottie Scheffler', 'USA', true);
+```
+
+## 2. Object Keys and Type Properties: Use `snake_case`
+
+**Rule:** All keys in objects, interfaces, and type definitions that represent data structures must be in `snake_case`.
+
+**Why This Is Important:**
+
+* **Database Consistency:** This aligns directly with our Supabase database schema, which uses `snake_case` for all table and column names. This practice eliminates the need for mapping or transformation layers (e.g., `camelCase` to `snake_case`) when fetching or sending data, reducing complexity and potential bugs.
+* **Clear Distinction:** It creates a clear separation between data objects (using `snake_case`) and other JavaScript/TypeScript constructs like local variables or utility functions (which may use `camelCase`).
+
+---
+
+### Examples
+
+**✅ DO: Use `snake_case` for object keys and type properties.**
+
+```typescript
+interface TournamentPrediction {
+    player_id: number;
+    full_name: string;
+    win_probability: number;
+    model_type: 'baseline_history_fit';
+}
+
+const predictionData = {
+    player_id: 123,
+    full_name: 'Rory McIlroy',
+    win_probability: 0.15,
+    model_type: 'baseline_history_fit',
+};
+```
+
+**❌ DON'T: Use `camelCase` for data-related object keys.**
+
+```typescript
+interface TournamentPrediction {
+    playerId: number;
+    fullName: string;
+    winProbability: number;
+    modelType: 'baseline_history_fit';
+}
+
+const predictionData = {
+    playerId: 123,
+    fullName: 'Rory McIlroy',
+    winProbability: 0.15,
+    modelType: 'baseline_history_fit',
+};
+```
+
+## 3. Avoid the `any` Type
+
+**Rule:** Never use the `any` type except in very rare circumstances where you're migrating legacy code or interfacing with untyped third-party libraries.
+
+**Why This Is Important:**
+
+* **Type Safety:** Using `any` defeats the purpose of TypeScript by disabling all type checking, making your code prone to runtime errors.
+* **Developer Experience:** You lose IntelliSense, autocomplete, and refactoring capabilities when using `any`.
+* **Maintainability:** Code with `any` types is harder to understand and refactor safely.
+* **Bug Prevention:** TypeScript's static analysis can catch many bugs at compile time, but `any` bypasses these checks.
+
+---
+
+### Examples
+
+**✅ DO: Use specific types, unions, or generics.**
+
+```typescript
+// Use specific types
+function processPlayerData(data: {
+    player_id: number;
+    full_name: string;
+    country: string;
+}) {
+    // ... function logic
+}
+
+// Use union types for known possibilities
+type ApiResponse<T> = {
+    success: true;
+    data: T;
+} | {
+    success: false;
+    error: string;
+}
+
+// Use generics for reusable components
+function createApiClient<T>(config: {
+    baseUrl: string;
+    transformer: (data: unknown) => T;
+}) {
+    // ... function logic
+}
+
+// Use unknown for truly unknown data, then narrow it
+function handleApiResponse(response: unknown) {
+    if (typeof response === 'object' && response !== null && 'status' in response) {
+        // Type narrowing through guards
+        return response;
+    }
+    throw new Error('Invalid response format');
+}
+```
+
+**❌ DON'T: Use `any` to bypass type checking.**
+
+```typescript
+// Avoid this - no type safety
+function processData(data: any) {
+    return data.player.name.toUpperCase(); // Could fail at runtime
+}
+
+// Avoid this - loses all benefits of TypeScript
+const apiResponse: any = await fetch('/api/data');
+const playerName = apiResponse.data.player.full_name; // No autocomplete or error checking
+```
+
+## 4. Prefer Zod Schemas with Inferred Types
+
+**Rule:** Use Zod schemas to define data structures and infer TypeScript types from them, rather than writing separate `type` or `interface` definitions.
+
+**Why This Is Important:**
+
+* **Single Source of Truth:** The schema serves as both runtime validation and compile-time typing, eliminating duplication.
+* **Runtime Safety:** Zod provides runtime validation that catches data inconsistencies that TypeScript alone cannot.
+* **Automatic Type Inference:** Types are automatically derived from schemas, reducing maintenance overhead.
+* **Schema Evolution:** When you update a schema, the types automatically update, preventing drift between validation and typing.
+* **API Integration:** Perfect for validating external API responses and user inputs.
+
+---
+
+### Examples
+
+**✅ DO: Define Zod schemas and infer types.**
+
+```typescript
+import { z } from 'zod';
+
+// Define schema first
+const PlayerSchema = z.object({
+    player_id: z.number(),
+    full_name: z.string().min(1),
+    country: z.string(),
+    is_active: z.boolean().default(true),
+    skill_ratings: z.object({
+        sg_total: z.number(),
+        sg_putt: z.number(),
+        sg_arg: z.number(),
+        sg_app: z.number(),
+        sg_ott: z.number(),
+    }).optional(),
+});
+
+// Infer the TypeScript type
+type Player = z.infer<typeof PlayerSchema>;
+
+// Use in functions with validation
+function createPlayer(data: unknown): Player {
+    return PlayerSchema.parse(data); // Runtime validation + type safety
+}
+
+// For API responses
+const ApiResponseSchema = z.object({
+    success: z.boolean(),
+    data: PlayerSchema.array(),
+    total_count: z.number(),
+});
+
+type ApiResponse = z.infer<typeof ApiResponseSchema>;
+```
+
+**❌ DON'T: Write separate interfaces and schemas.**
+
+```typescript
+// Avoid duplication - schema and interface can drift apart
+interface Player {
+    player_id: number;
+    full_name: string;
+    country: string;
+    is_active: boolean;
+}
+
+const PlayerSchema = z.object({
+    player_id: z.number(),
+    full_name: z.string(),
+    country: z.string(),
+    // Oops! Forgot is_active - now they're out of sync
+});
+
+// Avoid manual type definitions for data that needs validation
+interface ApiResponse {
+    success: boolean;
+    data: Player[];
+    total_count: number;
+}
+
+function handleApiData(response: ApiResponse) {
+    // No runtime validation - could fail if API changes
+    return response.data.map(player => player.full_name);
+}
+```
+
+**Advanced Example: Combining with Function Arguments**
+
+```typescript
+// Combine with our single object argument pattern
+const CreatePlayerParamsSchema = z.object({
+    full_name: z.string().min(2),
+    country: z.string().min(2),
+    is_active: z.boolean().default(true),
+});
+
+type CreatePlayerParams = z.infer<typeof CreatePlayerParamsSchema>;
+
+function createPlayer(params: CreatePlayerParams) {
+    // Validate at runtime if needed
+    const validatedParams = CreatePlayerParamsSchema.parse(params);
+    // ... rest of function
+}
+
+// Or for tool parameters (as seen in our security implementation)
+const ToolParameterSchema = z.object({
+    playerName: z.string()
+        .min(2, 'Player name must be at least 2 characters')
+        .max(100, 'Player name must be less than 100 characters')
+        .regex(/^[a-zA-Z\s\-.']+$/, 'Player name contains invalid characters'),
+});
+
+type ToolParameter = z.infer<typeof ToolParameterSchema>;
+```
+
+## 5. Prefer Lodash Over Native Array/Object Methods
+
+**Rule:** Use Lodash functions instead of native JavaScript array and object methods like `.map()`, `.filter()`, `.find()`, `.reduce()`, etc.
+
+**Why This Is Important:**
+
+* **Consistency:** Using a consistent library for data manipulation creates more predictable and maintainable code across the entire codebase.
+* **Enhanced Functionality:** Lodash provides additional utility functions and handles edge cases that native methods don't cover (e.g., deep cloning, complex object manipulation).
+* **Performance:** Lodash functions are often optimized for performance and handle large datasets more efficiently than native methods.
+* **Null Safety:** Lodash functions typically handle `null` and `undefined` values more gracefully than native methods.
+* **Functional Programming:** Lodash promotes a more functional programming style with better composition and reusability.
+
+---
+
+### Examples
+
+**✅ DO: Use Lodash functions with named imports.**
+
+```typescript
+import { map, filter, find, reduce, groupBy, sortBy } from 'lodash';
+
+// Use Lodash for array operations
+const activePlayerNames = map(
+    filter(players, { is_active: true }),
+    'full_name'
+);
+
+// Use Lodash for complex operations
+const playersByCountry = groupBy(players, 'country');
+const sortedByRating = sortBy(players, ['skill_ratings.sg_total']);
+
+// Use Lodash for object manipulation
+const playerData = map(players, ({ player_id, full_name, country }) => ({
+    player_id,
+    full_name,
+    country,
+}));
+
+// Find with complex conditions
+const topPlayer = find(players, (player) => 
+    player.skill_ratings?.sg_total > 2.0 && player.is_active
+);
+```
+
+**❌ DON'T: Use native array methods.**
+
+```typescript
+// Avoid native methods - less consistent and feature-limited
+const activePlayerNames = players
+    .filter(player => player.is_active)
+    .map(player => player.full_name);
+
+// Native methods don't handle edge cases as well
+const topPlayer = players.find(player => 
+    player.skill_ratings?.sg_total > 2.0 && player.is_active
+);
+
+// More verbose and error-prone
+const playersByCountry = players.reduce((acc, player) => {
+    if (!acc[player.country]) {
+        acc[player.country] = [];
+    }
+    acc[player.country].push(player);
+    return acc;
+}, {} as Record<string, typeof players>);
+```
+
+## 6. Avoid Type Casting and Assertions
+
+**Rule:** Avoid using type casting with `as` and non-null assertions with `!` except in very rare circumstances where you have definitive knowledge about the type.
+
+**Why This Is Important:**
+
+* **Type Safety:** Type assertions bypass TypeScript's type checking and can lead to runtime errors if the assertion is incorrect.
+* **Runtime Errors:** Using `!` to assert non-null can cause crashes if the value is actually `null` or `undefined` at runtime.
+* **Code Clarity:** Proper type guards and validation make code more explicit about what types are expected and handled.
+* **Maintainability:** Code with type assertions is harder to refactor safely because the compiler can't verify the assertions remain valid.
+
+---
+
+### Examples
+
+**✅ DO: Use type guards, optional chaining, and proper typing.**
+
+```typescript
+import { z } from 'zod';
+
+// Use type guards instead of assertions
+function isPlayer(data: unknown): data is { player_id: number; full_name: string } {
+    return typeof data === 'object' && 
+           data !== null && 
+           'player_id' in data && 
+           'full_name' in data;
+}
+
+// Use optional chaining instead of non-null assertions
+function getPlayerRating(player: { skill_ratings?: { sg_total: number } }) {
+    return player.skill_ratings?.sg_total ?? 0;
+}
+
+// Use Zod for runtime validation instead of casting
+const PlayerResponseSchema = z.object({
+    player_id: z.number(),
+    full_name: z.string(),
+    skill_ratings: z.object({
+        sg_total: z.number(),
+    }).optional(),
+});
+
+function processApiResponse(response: unknown) {
+    const validatedResponse = PlayerResponseSchema.parse(response);
+    return validatedResponse.skill_ratings?.sg_total ?? 0;
+}
+
+// Use proper typing with generics
+function handleApiCall<T>(
+    validator: z.ZodSchema<T>,
+    response: unknown
+): T {
+    return validator.parse(response);
+}
+```
+
+**❌ DON'T: Use type casting and non-null assertions.**
+
+```typescript
+// Avoid type casting - no runtime validation
+function processApiResponse(response: unknown) {
+    const player = response as { 
+        player_id: number; 
+        full_name: string; 
+        skill_ratings: { sg_total: number } 
+    };
+    return player.skill_ratings.sg_total; // Could crash if structure is wrong
+}
+
+// Avoid non-null assertions - can cause runtime errors
+function getPlayerRating(player: { skill_ratings?: { sg_total: number } }) {
+    return player.skill_ratings!.sg_total; // Crashes if skill_ratings is undefined
+}
+
+// Avoid casting with any intermediate step
+function handleData(data: unknown) {
+    const typedData = (data as any).players as Player[];
+    return typedData.map(p => p.full_name); // Multiple type safety violations
+}
+
+// Avoid assertion when proper typing is possible
+function getElementById(id: string) {
+    return document.getElementById(id)!; // Could return null
+}
+```
+
+**Exception Cases (Use Sparingly):**
+
+```typescript
+// Acceptable: Working with DOM elements when you're certain they exist
+function initializeApp() {
+    // Only if you're 100% certain the element exists
+    const appRoot = document.getElementById('app') as HTMLDivElement;
+    
+    // Better: Handle the null case explicitly
+    const appRoot = document.getElementById('app');
+    if (!appRoot) {
+        throw new Error('App root element not found');
+    }
+    // Now TypeScript knows appRoot is not null
+}
+
+// Acceptable: Type casting for well-known library types
+import { Request } from 'express';
+
+function handleRequest(req: Request) {
+    // If you've added custom properties via middleware
+    const user = (req as any).user; // Last resort, prefer extending types properly
+}
+```
+
+## 7. Avoid `<p>` Tags in JSX
+
+**Rule:** Never use `<p>` tags in JSX. Always prefer `<div>` tags for text content and layout.
+
+**Why This Is Important:**
+
+* **Semantic Complexity:** `<p>` tags have special semantic rules in HTML that can cause unexpected behavior when nested or combined with other elements.
+* **Accessibility Issues:** `<p>` tags create specific accessibility expectations that may not align with your actual content structure, potentially confusing screen readers and other assistive technologies.
+* **Layout Predictability:** `<div>` elements provide more predictable behavior for CSS styling and JavaScript interactions without the semantic constraints of paragraph elements.
+* **Nesting Restrictions:** `<p>` tags cannot contain block-level elements, which can lead to invalid HTML when React components are composed together.
+* **Consistency:** Using `<div>` exclusively for text content creates a more consistent and maintainable component structure.
+
+---
+
+### Examples
+
+**✅ DO: Use `<div>` tags for all text content.**
+
+```tsx
+// Use div for simple text content
+function PlayerCard({ player }: { player: Player }) {
+    return (
+        <div className="player-card">
+            <div className="player-name">{player.full_name}</div>
+            <div className="player-country">{player.country}</div>
+            <div className="player-rating">
+                Rating: {player.skill_ratings?.sg_total ?? 'N/A'}
+            </div>
+        </div>
+    );
+}
+
+// Use div for multi-line text content
+function TournamentDescription() {
+    return (
+        <div className="tournament-info">
+            <div className="description">
+                This tournament features the top golfers from around the world 
+                competing for the championship title.
+            </div>
+            <div className="details">
+                The event will span four days with challenging course conditions 
+                and premium prize money.
+            </div>
+        </div>
+    );
+}
+
+// Use div even for what might seem like "paragraph" content
+function UserMessage({ message }: { message: string }) {
+    return (
+        <div className="message-container">
+            <div className="message-text">{message}</div>
+            <div className="message-timestamp">
+                {new Date().toLocaleDateString()}
+            </div>
+        </div>
+    );
+}
+```
+
+**❌ DON'T: Use `<p>` tags in JSX.**
+
+```tsx
+// Avoid p tags - can cause semantic and accessibility issues
+function PlayerCard({ player }: { player: Player }) {
+    return (
+        <div className="player-card">
+            <p className="player-name">{player.full_name}</p>
+            <p className="player-country">{player.country}</p>
+            <p className="player-rating">
+                Rating: {player.skill_ratings?.sg_total ?? 'N/A'}
+            </p>
+        </div>
+    );
+}
+
+// Avoid p tags for multi-line content - nesting issues
+function TournamentDescription() {
+    return (
+        <div className="tournament-info">
+            <p className="description">
+                This tournament features the top golfers from around the world 
+                competing for the championship title.
+            </p>
+            <p className="details">
+                The event will span four days with challenging course conditions 
+                and premium prize money.
+            </p>
+        </div>
+    );
+}
+
+// Avoid p tags even for simple text - inconsistent with other patterns
+function UserMessage({ message }: { message: string }) {
+    return (
+        <div className="message-container">
+            <p className="message-text">{message}</p>
+            <div className="message-timestamp">
+                {new Date().toLocaleDateString()}
+            </div>
+        </div>
+    );
+}
+```
+
+## 8. Authentication Handling: Rely on Middleware
+
+**Rule:** Never manually check for user authentication or redirect unauthenticated users in individual pages or components. Our middleware tier handles all authentication across routes.
+
+**Why This Is Important:**
+
+* **Single Responsibility:** Middleware handles authentication centrally, eliminating duplication and ensuring consistent security across all protected routes.
+* **Performance:** Avoiding redundant auth checks in individual pages reduces unnecessary server-side operations.
+* **Maintainability:** Authentication logic is centralized in one place, making it easier to update or modify security policies.
+* **Route Protection:** All `/protected/*` routes are automatically secured by middleware, so pages can focus on their core functionality.
+
+---
+
+### Examples
+
+**✅ DO: Let middleware handle authentication completely.**
+
+```tsx
+// Pages in /protected/* routes - no auth checks needed
+export default async function ChatPage() {
+    // Middleware guarantees authenticated user access
+    // Focus on page functionality, not auth verification
+    const sessionData = await getUserSessionWithMessages()
+    const tournament = await selectCurrentTournament()
+    
+    return (
+        <ChatPageClient
+            initialChatData={sessionData}
+            tournament={tournament}
+        />
+    )
+}
+
+// API routes in /protected/* paths - no manual auth needed
+export async function POST(req: Request) {
+    // Middleware has already verified authentication
+    // Process request without additional auth checks
+    const { messages } = await req.json()
+    // ... handle request
+}
+```
+
+**❌ DON'T: Manually check authentication in protected pages.**
+
+```tsx
+// Avoid redundant auth checks in protected routes
+export default async function ChatPage() {
+    const supabase = await createClient()
+    
+    // ❌ Unnecessary - middleware already handles this
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+        redirect('/auth/login') // ❌ Middleware already prevents unauthenticated access
+    }
+    
+    // ... rest of component
+}
+
+// Avoid auth checks in API routes under /protected/*
+export async function POST(req: Request) {
+    const supabase = await createClient()
+    
+    // ❌ Unnecessary validation
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+    
+    // ... handle request
+}
+```
+
+## 9. Database Access: Rely on Row Level Security (RLS)
+
+**Rule:** Never pass user IDs to database queries. Our application uses Row Level Security (RLS) policies that automatically filter data based on the authenticated user's context.
+
+**Why This Is Important:**
+
+* **Security by Default:** RLS provides database-level security that cannot be bypassed, even if application code has bugs.
+* **Cleaner Code:** Eliminates the need to manually filter queries by user ID, reducing code complexity and potential errors.
+* **Consistency:** All database operations automatically respect user boundaries without explicit filtering logic.
+* **Performance:** Database-level filtering is more efficient than application-level filtering of large datasets.
+
+---
+
+### Examples
+
+**✅ DO: Let RLS handle user data filtering automatically.**
+
+```typescript
+// RLS automatically filters to current user's data
+export async function getUserChatSessions() {
+    const supabase = await createClient()
+    
+    // No user_id needed - RLS handles filtering
+    const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(10)
+    
+    return { data, error }
+}
+
+// Insert operations also respect RLS
+export async function createChatSession({ title }: { title?: string }) {
+    const supabase = await createClient()
+    
+    // RLS automatically sets user_id to current authenticated user
+    const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert({ title })
+        .select()
+        .single()
+    
+    return { data, error }
+}
+```
+
+**❌ DON'T: Manually pass user IDs or filter by user.**
+
+```typescript
+// Avoid manual user ID handling - RLS does this automatically
+export async function getUserChatSessions(userId: string) { // ❌ Unnecessary parameter
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', userId) // ❌ RLS handles this automatically
+        .order('updated_at', { ascending: false })
+    
+    return { data, error }
+}
+
+// Avoid explicit user_id in inserts
+export async function createChatSession({ 
+    userId, // ❌ Not needed
+    title 
+}: { 
+    userId: string
+    title?: string 
+}) {
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert({ 
+            user_id: userId, // ❌ RLS handles this
+            title 
+        })
+    
+    return { data, error }
+}
+```
+
+## 10. App Router File Organization: Pages Only in App Directory
+
+**Rule:** Only keep `page.tsx`, `layout.tsx`, and `route.ts` files in the app router directory. All other components, utilities, and helper files should be moved to `/components` or `/utils` directories and imported as needed.
+
+**Why This Is Important:**
+
+* **Clear Separation:** App router directory structure directly maps to URL routes, so only route-defining files should live there.
+* **Reusability:** Components and utilities in dedicated directories can be easily shared across multiple pages and routes.
+* **Maintainability:** Cleaner directory structure makes it easier to locate and organize code by function rather than by route.
+* **Next.js Conventions:** Follows Next.js 13+ app router best practices for file organization.
+
+---
+
+### Examples
+
+**✅ DO: Keep only route files in app directory, move others to appropriate directories.**
+
+```
+app/
+  protected/
+    chat/
+      page.tsx          ✅ Route definition
+      layout.tsx        ✅ Layout for chat routes
+    api/
+      chat/
+        route.ts        ✅ API route handler
+
+components/
+  chat/
+    chat-page-client.tsx    ✅ Client component
+    chat-interface.tsx      ✅ Reusable UI component
+    message-list.tsx        ✅ UI component
+
+utils/
+  helpers/
+    data/
+      chat-sessions.ts      ✅ Database utilities
+    auth/
+      session-manager.ts    ✅ Auth utilities
+```
+
+**Use proper imports in page files:**
+
+```tsx
+// app/protected/chat/page.tsx
+import { ChatPageClient } from '~/components/chat/chat-page-client'
+import { getUserSessionWithMessages } from '~/utils/helpers/data/chat-sessions'
+
+export default async function ChatPage() {
+    const sessionData = await getUserSessionWithMessages()
+    
+    return <ChatPageClient initialChatData={sessionData} />
+}
+```
+
+**❌ DON'T: Keep non-route files in app directory.**
+
+```
+app/
+  protected/
+    chat/
+      page.tsx
+      chat-page-client.tsx      ❌ Should be in /components
+      chat-session-utils.ts     ❌ Should be in /utils
+      types.ts                  ❌ Should be in /utils/types
+      hooks/
+        use-chat-session.ts     ❌ Should be in /utils/hooks
+```
+
+**Avoid importing from app directory in components:**
+
+```tsx
+// ❌ Don't import from app directory paths
+import { ChatPageClient } from '../../app/protected/chat/chat-page-client'
+
+// ✅ Import from organized directories  
+import { ChatPageClient } from '~/components/chat/chat-page-client'
+```

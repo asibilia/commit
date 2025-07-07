@@ -1,0 +1,28 @@
+{
+  "name": "commit",
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "chalk": "^5.4.1",
+    "zod": "^3.25.20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.4.0",
+    "prettier": "^3.3.3",
+    "syncpack": "^13.0.4",
+    "typescript-eslint": "^8.32.1"
+  },
+  "module": "main.ts",
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "type": "module",
+  "scripts": {
+    "commit": "bun run main.ts"
+  }
+}
