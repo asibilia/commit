@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/asibilia/commit/compare/v1.0.1...v1.0.2) (2025-07-07)
+
+
+### Bug Fixes
+
+* **repo:** update project name ([74bce0b](https://github.com/asibilia/commit/commit/74bce0b7b48f14b7344c655762781ab16d3208d8))
+
 ## [1.0.1](https://github.com/asibilia/commit/compare/v1.0.0...v1.0.1) (2025-07-07)
 
 ### Bug Fixes
