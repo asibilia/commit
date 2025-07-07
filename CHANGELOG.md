@@ -1,3 +1,11 @@
+## [1.0.4](https://github.com/asibilia/commit/compare/v1.0.3...v1.0.4) (2025-07-07)
+
+
+### Bug Fixes
+
+* **page:** help ([af346ac](https://github.com/asibilia/commit/commit/af346aca14cd02363683fa93607b5290d852f7f7))
+* **repo:** cli improvements ([a726f7a](https://github.com/asibilia/commit/commit/a726f7a763bca81dc259c3342b6670d18eb4d34c))
+
 ## [1.0.3](https://github.com/asibilia/commit/compare/v1.0.2...v1.0.3) (2025-07-07)
 
 
