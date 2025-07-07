@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/asibilia/commit/compare/v1.0.4...v1.0.5) (2025-07-07)
+
+
+### Bug Fixes
+
+* **repo:** change from compiled binaries to cross-platform ([e072fde](https://github.com/asibilia/commit/commit/e072fdeb904ee159e99c1d0439f822295434a359))
+
 ## [1.0.4](https://github.com/asibilia/commit/compare/v1.0.3...v1.0.4) (2025-07-07)
 
 
