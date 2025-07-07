@@ -1,7 +1,7 @@
 # commit
 
-[![npm version](https://badge.fury.io/js/%40alecsibilia%2Fcommit.svg)](https://badge.fury.io/js/%40alecsibilia%2Fcommit)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm version](https://img.shields.io/badge/npm%20package-@alecsibilia/commit-red.svg)](https://www.npmjs.com/package/@alecsibilia/commit)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](http://opensource.org/license/apache-2-0)
 
 Interactive CLI tool for creating standardized commit messages with customizable types and scopes.
 
