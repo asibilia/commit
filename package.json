@@ -4,7 +4,7 @@
   "version": "1.0.4",
   "author": "Your Name <your.email@example.com>",
   "bin": {
-    "commit": "./dist/commit"
+    "commit": "./dist/index.js"
   },
   "dependencies": {
     "@clack/prompts": "0.11.0",
@@ -27,7 +27,7 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "default": "./dist/commit"
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -45,7 +45,7 @@
     "typescript"
   ],
   "license": "MIT",
-  "main": "./dist/commit",
+  "main": "./dist/index.js",
   "publishConfig": {
     "access": "public"
   },
@@ -63,13 +63,11 @@
     ]
   },
   "scripts": {
-    "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile ./dist/commit",
-    "build:dev": "bun build --compile ./src/index.ts --outfile ./dist/commit",
+    "build": "mkdir -p dist && bun build --minify --sourcemap ./src/index.ts --outdir ./dist --target node",
+    "build:dev": "mkdir -p dist && bun build ./src/index.ts --outdir ./dist --target node",
     "clean": "rm -rf dist",
     "commit": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
-    "format": "bun run prettier --write src/**/*.ts",
-    "lint": "bun run eslint src/**/*.ts",
     "prepublishOnly": "bun run clean && bun run build",
     "release": "semantic-release",
     "release:dry": "semantic-release --dry-run",
