@@ -1,7 +1,7 @@
 {
   "name": "@alecsibilia/commit",
   "description": "Interactive CLI tool for creating standardized commit messages with customizable types and scopes",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "Your Name <your.email@example.com>",
   "bin": {
     "commit": "./dist/commit"
