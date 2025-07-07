@@ -1,5 +1,5 @@
 {
-  "name": "commit",
+  "name": "@alecsibilia/commit",
   "description": "Interactive CLI tool for creating standardized commit messages with customizable types and scopes",
   "version": "1.0.0",
   "author": "Your Name <your.email@example.com>",
