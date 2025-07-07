@@ -13,7 +13,12 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.3",
+    "@semantic-release/npm": "^12.0.2",
     "@types/bun": "latest",
+    "semantic-release": "^24.2.6",
     "typescript": "^5.7.3"
   },
   "engines": {
@@ -41,6 +46,19 @@
   ],
   "license": "MIT",
   "main": "./dist/commit",
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git",
+      "@semantic-release/github"
+    ]
+  },
   "scripts": {
     "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile ./dist/commit",
     "build:dev": "bun build --compile ./src/index.ts --outfile ./dist/commit",
@@ -50,6 +68,8 @@
     "format": "bun run prettier --write src/**/*.ts",
     "lint": "bun run eslint src/**/*.ts",
     "prepublishOnly": "bun run clean && bun run build",
+    "release": "semantic-release",
+    "release:dry": "semantic-release --dry-run",
     "test": "bun test"
   },
   "type": "module"
