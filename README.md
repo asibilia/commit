@@ -1,6 +1,6 @@
 # commit
 
-[![npm version](https://badge.fury.io/js/commit.svg)](https://badge.fury.io/js/commit)
+[![npm version](https://badge.fury.io/js/%40alecsibilia%2Fcommit.svg)](https://badge.fury.io/js/%40alecsibilia%2Fcommit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Interactive CLI tool for creating standardized commit messages with customizable types and scopes.
@@ -10,13 +10,13 @@ Interactive CLI tool for creating standardized commit messages with customizable
 Install globally via npm:
 
 ```bash
-npm install -g commit
+npm install -g @alecsibilia/commit
 ```
 
 Or use with bun:
 
 ```bash
-bun add -g commit
+bun add -g @alecsibilia/commit
 ```
 
 ## Usage

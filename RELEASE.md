@@ -97,7 +97,7 @@ The following secrets must be configured in GitHub repository settings:
 
 The current version is automatically displayed in the README:
 
-[![npm version](https://badge.fury.io/js/commit.svg)](https://badge.fury.io/js/commit)
+[![npm version](https://badge.fury.io/js/%40alecsibilia%2Fcommit.svg)](https://badge.fury.io/js/%40alecsibilia%2Fcommit)
 
 ## Release Notes
 

@@ -46,6 +46,9 @@
   ],
   "license": "MIT",
   "main": "./dist/commit",
+  "publishConfig": {
+    "access": "public"
+  },
   "release": {
     "branches": [
       "main"
