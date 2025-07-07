@@ -1,17 +1,14 @@
 ## [1.0.1](https://github.com/asibilia/commit/compare/v1.0.0...v1.0.1) (2025-07-07)
 
-
 ### Bug Fixes
 
 * **repo:** adds scope to projec tname ([a2d35ca](https://github.com/asibilia/commit/commit/a2d35ca2789608fbe6e8a902aecd78a8477d92bc))
 
 # 1.0.0 (2025-07-07)
 
-
 ### Bug Fixes
 
 * **repo:** update secret name ([84a6b82](https://github.com/asibilia/commit/commit/84a6b82cec972ab877ca55359d93033a4c754341))
-
 
 ### Features
 
