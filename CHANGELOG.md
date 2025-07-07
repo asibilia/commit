@@ -1,0 +1,14 @@
+# 1.0.0 (2025-07-07)
+
+
+### Bug Fixes
+
+* **repo:** update secret name ([84a6b82](https://github.com/asibilia/commit/commit/84a6b82cec972ab877ca55359d93033a4c754341))
+
+
+### Features
+
+* **repo:** adds auto push ([c023dad](https://github.com/asibilia/commit/commit/c023dad8c5ef7ad368b782bd166cdafc75fd32b2))
+* **repo:** adds cli variable support ([21315fb](https://github.com/asibilia/commit/commit/21315fb7098074e1877b5b5e89b45a511e518643))
+* **repo:** adds semantic release ([48c0a22](https://github.com/asibilia/commit/commit/48c0a226778f62bf21be45222a1812a6e0dcdca4))
+* **repo:** initial commit ([e1880a1](https://github.com/asibilia/commit/commit/e1880a18915ea17d222cbaeeb3635f53c56fb17d))
