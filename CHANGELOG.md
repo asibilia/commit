@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/asibilia/commit/compare/v1.0.2...v1.0.3) (2025-07-07)
+
+
+### Bug Fixes
+
+* **repo:** mark as public package ([97bacb9](https://github.com/asibilia/commit/commit/97bacb9ddf02620a3d3e85f7b67d14d41ff34f63))
+
 ## [1.0.2](https://github.com/asibilia/commit/compare/v1.0.1...v1.0.2) (2025-07-07)
 
 
