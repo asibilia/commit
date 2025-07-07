@@ -71,4 +71,4 @@ This project uses automated semantic releases. See [RELEASE.md](./RELEASE.md) fo
 
 ## License
 
-MIT
+Apache-2.0
