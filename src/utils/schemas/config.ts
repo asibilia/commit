@@ -7,6 +7,7 @@ const OptionConfigSchema = z.object({
 
 const GitConfigSchema = z.object({
     auto_add_all: z.boolean().optional().default(true),
+    auto_push: z.boolean().optional().default(true),
 })
 
 export const CommitConfigSchema = z.object({

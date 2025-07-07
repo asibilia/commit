@@ -71,4 +71,15 @@ export async function commit() {
         const errorOutput = await new Response(commitProcess.stderr).text()
         console.error(chalk.red('└─ ') + chalk.dim(errorOutput.trim()))
     }
+
+    if (git.auto_push) {
+        const pushProcess = Bun.spawn(['git', 'push'])
+        await pushProcess.exited
+
+        if (pushProcess.exitCode === 0) {
+            console.log('\n' + chalk.green('✓ Successfully pushed changes'))
+        } else {
+            console.error('\n' + chalk.red('✗ Failed to push changes'))
+        }
+    }
 }
