@@ -44,6 +44,7 @@
     "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile ./dist/commit",
     "build:dev": "bun build --compile ./src/index.ts --outfile ./dist/commit",
     "clean": "rm -rf dist",
+    "commit": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
     "format": "bun run prettier --write src/**/*.ts",
     "lint": "bun run eslint src/**/*.ts",
