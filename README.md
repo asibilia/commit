@@ -13,6 +13,16 @@ Interactive CLI tool for creating standardized commit messages with customizable
 bunx --bun @alecsibilia/commit
 ```
 
+Or via a package.json script:
+
+```json
+{
+  "scripts": {
+    "commit": "bunx --bun @alecsibilia/commit"
+  }
+}
+```
+
 ### Option 2: Global installation
 
 ```bash
@@ -30,17 +40,22 @@ commit
 npm install -D @alecsibilia/commit
 # or
 bun add -d @alecsibilia/commit
+
+# Then run:
+bun run commit
 ```
 
-Then add to your `package.json` scripts:
+Or add to your `package.json` scripts:
 
 ```json
 {
   "scripts": {
-    "commit": "bunx --bun @alecsibilia/commit"
+    "new:commit": "bun run --bun commit"
   }
 }
 ```
+
+> **Note** you must name your script something other than `commit` when running locally.
 
 And run:
 
