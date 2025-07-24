@@ -1,3 +1,10 @@
+## [1.0.8](https://github.com/asibilia/commit/compare/v1.0.7...v1.0.8) (2025-07-24)
+
+
+### Bug Fixes
+
+* **core:** adds type defs ([1b19082](https://github.com/asibilia/commit/commit/1b19082347451d8e643987bc254405d50067bbaf))
+
 ## [1.0.7](https://github.com/asibilia/commit/compare/v1.0.6...v1.0.7) (2025-07-24)
 
 
