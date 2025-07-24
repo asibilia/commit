@@ -34,8 +34,9 @@ export async function commit(options: CommitOptions = {}) {
         commitConfiguration = {}
     }
 
-    const { success, data, error } =
-        CommitConfigSchema.safeParse(commitConfiguration)
+    const { success, data, error } = CommitConfigSchema.safeParse(
+        commitConfiguration.default || commitConfiguration
+    )
 
     let types: OptionConfig[] = []
     let scopes: OptionConfig[] = []
