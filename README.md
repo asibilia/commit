@@ -60,9 +60,9 @@ Or add to your `package.json` scripts:
 And run:
 
 ```bash
-npm run commit
+npm run new:commit
 # or
-bun run commit
+bun run new:commit
 ```
 
 ### Command Line Options
