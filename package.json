@@ -26,7 +26,7 @@
   },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
   },
@@ -35,6 +35,7 @@
     "README.md",
     "LICENSE"
   ],
+  "types": "./dist/index.d.ts",
   "keywords": [
     "bun",
     "cli",
@@ -63,8 +64,8 @@
     ]
   },
   "scripts": {
-    "build": "mkdir -p dist && bun build --minify --sourcemap ./src/index.ts --outdir ./dist --target node",
-    "build:dev": "mkdir -p dist && bun build ./src/index.ts --outdir ./dist --target node",
+    "build": "mkdir -p dist && bun build --minify --sourcemap ./src/index.ts --outdir ./dist --target node && tsc --project tsconfig.build.json",
+    "build:dev": "mkdir -p dist && bun build ./src/index.ts --outdir ./dist --target node && tsc --project tsconfig.build.json",
     "clean": "rm -rf dist",
     "commit": "bun run src/index.ts",
     "dev": "bun run src/index.ts",
