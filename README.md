@@ -10,7 +10,7 @@ Interactive CLI tool for creating standardized commit messages with customizable
 ### Option 1: One-time use with npx or bunx (Recommended)
 
 ```bash
-bunx @alecsibilia/commit
+bunx --bun @alecsibilia/commit
 ```
 
 ### Option 2: Global installation
@@ -37,7 +37,7 @@ Then add to your `package.json` scripts:
 ```json
 {
   "scripts": {
-    "commit": "commit"
+    "commit": "bunx --bun @alecsibilia/commit"
   }
 }
 ```
