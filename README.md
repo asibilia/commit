@@ -59,9 +59,28 @@ bun run commit
 
 ### Configuration
 
-Create a `commit.config.ts` file in your project root:
+#### TypeScript Configuration (Recommended)
+
+Create a `commit.config.ts` file in your project root. TypeScript config files are supported when using `bun run --bun commit`:
 
 ```typescript
+import { type CommitConfig } from '@alecsibilia/commit'
+
+export default {
+  types: [
+    { value: 'feat', name: '✨ feat: A new feature' },
+    { value: 'fix', name: '🐛 fix: A bug fix' },
+    { value: 'chore', name: '🧹 chore: Maintenance tasks' }
+  ],
+  scopes: ['repo', 'cli', 'config']
+} satisfies CommitConfig
+```
+
+#### JavaScript Configuration
+
+Alternatively, create a `commit.config.js` file for broader compatibility:
+
+```javascript
 export const commitConfig = {
   types: [
     { value: 'feat', name: '✨ feat: A new feature' },
@@ -71,6 +90,8 @@ export const commitConfig = {
   scopes: ['repo', 'cli', 'config']
 }
 ```
+
+> **Note:** TypeScript configuration files (`.ts`) require using `bun run --bun commit` to leverage Bun's native TypeScript support. For Node.js environments, use JavaScript configuration files (`.js`) instead.
 
 ## Development
 
