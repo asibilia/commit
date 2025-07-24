@@ -5,26 +5,49 @@
 
 Interactive CLI tool for creating standardized commit messages with customizable types and scopes.
 
-## Installation
+## Installation & Usage
 
-Install globally via npm:
+### Option 1: One-time use with npx or bunx (Recommended)
+
+```bash
+bunx @alecsibilia/commit
+```
+
+### Option 2: Global installation
 
 ```bash
 npm install -g @alecsibilia/commit
-```
-
-Or use with bun:
-
-```bash
+# or
 bun add -g @alecsibilia/commit
+
+# Then run:
+commit
 ```
 
-## Usage
-
-Run the interactive commit tool:
+### Option 3: Local installation as dev dependency
 
 ```bash
-commit
+npm install -D @alecsibilia/commit
+# or
+bun add -d @alecsibilia/commit
+```
+
+Then add to your `package.json` scripts:
+
+```json
+{
+  "scripts": {
+    "commit": "commit"
+  }
+}
+```
+
+And run:
+
+```bash
+npm run commit
+# or
+bun run commit
 ```
 
 ### Command Line Options
