@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/asibilia/commit/compare/v1.0.6...v1.0.7) (2025-07-24)
+
+
+### Bug Fixes
+
+* **cli:** config importing ([11f0fcc](https://github.com/asibilia/commit/commit/11f0fcc72033475fc098f14fb0c7c89dd8a45980))
+
 ## [1.0.6](https://github.com/asibilia/commit/compare/v1.0.5...v1.0.6) (2025-07-07)
 
 
