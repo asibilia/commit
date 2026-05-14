@@ -30,6 +30,15 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
+# Force JavaScript-based actions (actions/checkout, oven-sh/setup-bun,
+# changesets/action, actions/setup-node) to run on Node.js 24 instead of
+# the deprecated Node.js 20. Node 20 is scheduled for removal from
+# runners on 2026-09-16; this opt-in flag moves us to Node 24
+# immediately. Once GitHub flips the default on 2026-06-02, this env
+# can be removed.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -84,6 +93,14 @@ jobs:
           # custom tag format (vX.Y.Z) and changelog extraction. Disable
           # the action's built-in release creation to avoid duplicates.
           createGithubReleases: false
+          # Author the Version PR's commits via the GitHub Contents API
+          # instead of `git commit` from the runner. When the action is
+          # authenticated as `github-actions[bot]` (the workflow token
+          # identity), API-authored commits are signed by GitHub's
+          # web-flow key, which satisfies the `required_signatures`
+          # ruleset on `main`. Without this, Version PR commits are
+          # unsigned and the merge is blocked.
+          commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

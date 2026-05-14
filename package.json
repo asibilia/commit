@@ -4,7 +4,7 @@
   "version": "1.0.9",
   "author": "Alec Sibilia <sibilia.alec@gmail.com>",
   "bin": {
-    "commit": "./dist/index.js"
+    "commit": "dist/index.js"
   },
   "dependencies": {
     "@clack/prompts": "0.11.0",
@@ -57,5 +57,9 @@
     "test": "bun test",
     "version": "changeset version && bun install"
   },
-  "type": "module"
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asibilia/commit.git"
+  }
 }
