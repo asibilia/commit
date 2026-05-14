@@ -30,6 +30,15 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
+# Force JavaScript-based actions (actions/checkout, oven-sh/setup-bun,
+# changesets/action, actions/setup-node) to run on Node.js 24 instead of
+# the deprecated Node.js 20. Node 20 is scheduled for removal from
+# runners on 2026-09-16; this opt-in flag moves us to Node 24
+# immediately. Once GitHub flips the default on 2026-06-02, this env
+# can be removed.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   release:
     runs-on: ubuntu-latest
