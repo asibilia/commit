@@ -84,6 +84,12 @@ jobs:
           # custom tag format (vX.Y.Z) and changelog extraction. Disable
           # the action's built-in release creation to avoid duplicates.
           createGithubReleases: false
+          # Author the Version PR's commits via the GitHub Contents API
+          # instead of `git commit` from the runner. API-authored commits
+          # are signed by GitHub's web-flow key, which satisfies the
+          # `required_signatures` ruleset on `main`. Without this, the
+          # Version PR's commits are unsigned and the merge is blocked.
+          commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
