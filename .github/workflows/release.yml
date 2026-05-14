@@ -37,6 +37,10 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      # issues: write is needed for `gh label create` (POST /repos/{owner}/{repo}/labels).
+      # `pull-requests: write` alone is enough to add a label to a PR, but not to
+      # create the label in the first place on a fresh repo.
+      issues: write
     outputs:
       published: ${{ steps.changesets.outputs.published }}
     steps:
