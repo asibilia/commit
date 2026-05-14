@@ -1,130 +1,58 @@
 # Release Process
 
-This project uses [semantic-release](https://semantic-release.gitbook.io/) for automated versioning, changelog generation, and publishing.
+This project uses [changesets](https://github.com/changesets/changesets) for versioning and changelog generation, and publishes to npm via [OIDC Trusted Publishing](https://docs.npmjs.com/trusted-publishers) — no long-lived `NPM_TOKEN` is stored as a GitHub secret.
 
-## Conventional Commits
+## Adding a changeset
 
-All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Commit Types and Version Bumps
-
-| Type | Description | Version Bump |
-|------|-------------|--------------|
-| `feat` | New feature | **Minor** (1.1.0) |
-| `fix` | Bug fix | **Patch** (1.0.1) |
-| `perf` | Performance improvement | **Patch** (1.0.1) |
-| `refactor` | Code refactoring | **Patch** (1.0.1) |
-| `build` | Build system changes | **Patch** (1.0.1) |
-| `revert` | Reverting changes | **Patch** (1.0.1) |
-| `docs` | Documentation only | **No release** |
-| `style` | Code style changes | **No release** |
-| `test` | Test changes | **No release** |
-| `chore` | Maintenance tasks | **No release** |
-| `ci` | CI/CD changes | **No release** |
-
-### Breaking Changes
-
-For **major** version bumps (2.0.0), include `BREAKING CHANGE:` in the commit footer:
-
-```
-feat: remove deprecated CLI flags
-
-BREAKING CHANGE: --old-flag has been removed, use --new-flag instead
-```
-
-## Release Workflow
-
-### Automated Releases
-
-1. **Push to main branch** - Any push to `main` triggers the release workflow
-2. **Commit Analysis** - Semantic-release analyzes commit messages since the last release
-3. **Version Calculation** - Determines the next version based on commit types
-4. **Changelog Generation** - Creates/updates `CHANGELOG.md` with release notes
-5. **NPM Publishing** - Publishes the package to npm registry
-6. **GitHub Release** - Creates a GitHub release with compiled binary
-7. **Git Tagging** - Tags the release commit with the new version
-
-### Manual Release Testing
-
-Test the release process locally (without publishing):
+When your PR contains a change worth releasing:
 
 ```bash
-# Test release configuration
-bun run release:dry
-
-# Test commit analysis only  
-npx semantic-release --dry-run --no-ci
+bun run changeset
 ```
 
-### Local Development
+Pick the bump type (patch / minor / major) and write a short summary. The CLI writes a `.changeset/<name>.md` file — commit that alongside your code.
 
-When developing locally, you can:
+| Bump | When to use | Example |
+|------|-------------|---------|
+| `patch` | Bug fix, internal refactor, perf, docs that affect users | "fix: handle empty config" |
+| `minor` | New feature, additive change | "feat: add `--scope` flag" |
+| `major` | Breaking API change | "feat!: rename `--type` to `--kind`" |
 
-1. **Preview version bump**:
+PRs without changesets are fine for changes that don't need a release (CI tweaks, internal docs, etc.).
 
-   ```bash
-   bun run release:dry
-   ```
+## What happens on merge to `main`
 
-2. **Check what would be released**:
+The `Release` workflow (`.github/workflows/release.yml`) runs and:
 
-   ```bash
-   npx semantic-release --dry-run --no-ci
-   ```
+1. **If pending changesets exist:** opens (or updates) a `chore(release): version package (...)` PR that bumps `package.json` and rewrites `CHANGELOG.md`.
+2. **If no pending changesets exist** (because the version PR just merged): creates a `vX.Y.Z` GitHub Release and publishes `@alecsibilia/commit` to npm via OIDC trusted publishing.
 
-## Configuration Files
+The release job opens the Version PR; a separate `publish` job (scoped to `environment: npm-publish` with `id-token: write` permission) does the actual npm publish. This isolates publish credentials to a single short-lived step.
 
-- `.releaserc.json` - Main semantic-release configuration
-- `.github/workflows/release.yml` - GitHub Actions workflow
-- `package.json` - Contains release scripts and npm configuration
+## First-time setup (one-time)
 
-## Environment Variables
+The OIDC trusted publisher must be configured before the workflow can publish.
 
-The following secrets must be configured in GitHub repository settings:
+On <https://www.npmjs.com/package/@alecsibilia/commit/access>:
 
-- `GITHUB_TOKEN` - Automatically provided by GitHub Actions
-- `NPM_TOKEN` - NPM authentication token for publishing
+1. **Publishing access** → "Require two-factor authentication or trusted publishers"
+2. **Add trusted publisher**:
+   - Publisher: GitHub Actions
+   - Organization or user: `asibilia`
+   - Repository: `commit`
+   - Workflow filename: `release.yml`
+   - Environment name: `npm-publish`
 
-## Version Badge
+On GitHub (this repo): **Settings → Environments → New environment → `npm-publish`**. (Optionally add required reviewers for a manual approval gate before publish.)
 
-The current version is automatically displayed in the README:
+## Local testing
 
-[![npm version](https://badge.fury.io/js/%40alecsibilia%2Fcommit.svg)](https://badge.fury.io/js/%40alecsibilia%2Fcommit)
+```bash
+# See what would be versioned without writing anything
+bunx changeset status
 
-## Release Notes
+# Apply versions locally (writes to working tree but doesn't tag/push)
+bun run version
+```
 
-All releases include:
-
-- 📋 **Changelog** - Automatically generated from commit messages
-- 🏷️ **Git Tag** - Semantic version tag (e.g., `v1.2.0`)
-- 📦 **NPM Package** - Published to npm registry
-- 🎯 **GitHub Release** - With compiled binary attachment
-- 🔗 **Release Notes** - Organized by commit type with emojis
-
-## Troubleshooting
-
-### Release Failed
-
-- Check commit message format follows conventional commits
-- Verify all required secrets are configured
-- Check build process completes successfully
-
-### Version Not Bumped
-
-- Ensure commits include release-triggering types (`feat`, `fix`, etc.)
-- Check if commits are on the `main` branch
-- Verify no `[skip ci]` or `[skip release]` in commit messages
-
-### NPM Publishing Failed
-
-- Verify `NPM_TOKEN` secret is valid
-- Check package name availability
-- Ensure version doesn't already exist
+To roll back: revert the version PR commit. Don't unpublish from npm.
