@@ -8,8 +8,8 @@ import { Command } from 'commander'
 import { commit, EXIT_CODES } from './commit'
 import { CliOptionsSchema } from './utils/schemas/options'
 
-// Accumulates repeatable flags. No commander default, so `--help` stays clean;
-// CliOptionsSchema supplies the `[]` default.
+// Accumulates repeatable flags (--body, --trailer). No commander default, so
+// `--help` stays clean; CliOptionsSchema handles absent values.
 function collect(value: string, previous: string[] | undefined): string[] {
     return [...(previous ?? []), value]
 }
@@ -50,7 +50,11 @@ async function main() {
         .option('-t, --type <type>', 'commit type (must exist in config)')
         .option('-s, --scope <scope>', 'commit scope (must exist in config)')
         .option('-m, --subject <text>', 'commit subject (header description)')
-        .option('-b, --body <text>', 'commit body (may contain newlines)')
+        .option(
+            '-b, --body <text>',
+            "commit body paragraph (repeatable, one paragraph each, joined by a blank line); use $'...' for real newlines",
+            collect
+        )
         .option(
             '--breaking <description>',
             'mark as breaking: adds "!" to the header and a BREAKING CHANGE footer'

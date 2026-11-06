@@ -41,6 +41,58 @@ describe('buildCommitMessage', () => {
         ).toBe('feat(cli): add x')
     })
 
+    test('multiple bodies become paragraphs joined by one blank line', () => {
+        expect(
+            buildCommitMessage({
+                type: 'feat',
+                scope: 'cli',
+                subject: 'add x',
+                body: ['one', 'two\nstill two  ', '\nthree\n'],
+                trailers: ['Refs: #1'],
+            })
+        ).toBe(
+            'feat(cli): add x\n\none\n\ntwo\nstill two\n\nthree\n\nRefs: #1'
+        )
+    })
+
+    test('blank and whitespace-only bodies are dropped', () => {
+        expect(
+            buildCommitMessage({
+                type: 'feat',
+                scope: 'cli',
+                subject: 'add x',
+                body: ['', 'one', '   ', ' \n\t ', 'two'],
+            })
+        ).toBe('feat(cli): add x\n\none\n\ntwo')
+        expect(
+            buildCommitMessage({
+                type: 'feat',
+                scope: 'cli',
+                subject: 'add x',
+                body: ['  ', ''],
+            })
+        ).toBe('feat(cli): add x')
+    })
+
+    test('a single-element body array matches the plain string', () => {
+        const body = 'first line  \n\nsecond paragraph\n'
+        const fields = { type: 'feat', scope: 'cli', subject: 'add x' }
+        expect(buildCommitMessage({ ...fields, body: [body] })).toBe(
+            buildCommitMessage({ ...fields, body })
+        )
+    })
+
+    test('literal \\n sequences are kept as-is', () => {
+        expect(
+            buildCommitMessage({
+                type: 'feat',
+                scope: 'cli',
+                subject: 'add x',
+                body: ['a\\nb'],
+            })
+        ).toBe('feat(cli): add x\n\na\\nb')
+    })
+
     test('breaking adds ! and a BREAKING CHANGE footer', () => {
         expect(
             buildCommitMessage({

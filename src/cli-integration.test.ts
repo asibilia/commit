@@ -106,6 +106,28 @@ describe('CLI (non-TTY)', () => {
         )
     })
 
+    test('repeated -b: each value is its own paragraph', async () => {
+        const result = await runCli(repo, [
+            '-t',
+            'feat',
+            '-s',
+            'cli',
+            '-m',
+            'header',
+            '-b',
+            'one',
+            '-b',
+            'two',
+            '--trailer',
+            'Refs: #9',
+        ])
+
+        expect(result.exitCode).toBe(0)
+        expect(git(repo, ['log', '-1', '--format=%B']).trimEnd()).toBe(
+            'feat(cli): header\n\none\n\ntwo\n\nRefs: #9'
+        )
+    })
+
     test('short flags and -c config path work from another cwd', async () => {
         const otherCwd = mkdtempSync(join(tmpdir(), 'commit-cli-cwd-'))
         try {

@@ -5,7 +5,11 @@ export interface CommitFields {
     type: string
     scope: string
     subject: string
-    body?: string
+    /**
+     * Body text, or several paragraphs (one per `--body`). Paragraphs are
+     * joined by a blank line; blank ones are dropped.
+     */
+    body?: string | string[]
     breaking?: string
     trailers?: string[]
 }
@@ -24,12 +28,34 @@ function normalizeBlock(value: string): string {
 }
 
 /**
+ * Joins body paragraphs with one blank line, after normalizing each one.
+ * Blank or whitespace-only paragraphs are dropped. A single string is
+ * treated as one paragraph, so it may still contain its own newlines.
+ *
+ * @param body - One body string, or one string per paragraph
+ * @returns The normalized body, or `''` when nothing is left
+ *
+ * @example
+ * ```typescript
+ * joinBodyParagraphs(['one', '  ', 'two\nmore']) // 'one\n\ntwo\nmore'
+ * ```
+ */
+export function joinBodyParagraphs(body?: string | string[]): string {
+    return [body ?? []]
+        .flat()
+        .map(normalizeBlock)
+        .filter((paragraph) => paragraph !== '')
+        .join('\n\n')
+}
+
+/**
  * Builds a conventional commit message from resolved fields.
  *
  * Layout:
  * - header: `type(scope): subject`, or `type(scope)!: subject` when
  *   `breaking` is set
- * - blank line + body, when a non-blank body is given
+ * - blank line + body, when a non-blank body is given; an array of
+ *   paragraphs is joined by blank lines, skipping blank ones
  * - blank line + footers: `BREAKING CHANGE: <description>` first, then each
  *   trailer in order, one per line
  *
@@ -52,7 +78,7 @@ function normalizeBlock(value: string): string {
  * ```
  */
 export function buildCommitMessage(fields: CommitFields): string {
-    const body = normalizeBlock(fields.body ?? '')
+    const body = joinBodyParagraphs(fields.body)
     const breaking = normalizeBlock(fields.breaking ?? '')
     const trailers = (fields.trailers ?? [])
         .map((trailer) => trailer.trim())

@@ -84,7 +84,7 @@ Pass `--type`, `--scope` and `--subject` and the CLI never prompts, with or with
 | `-t, --type <type>` | yes | Commit type. Must be one of the `types` values in `commit.config.ts` |
 | `-s, --scope <scope>` | yes | Commit scope. Must be one of the `scopes` values in `commit.config.ts` |
 | `-m, --subject <text>` | yes | Header description. Must be a non-empty single line |
-| `-b, --body <text>` | no | Commit body. May contain newlines |
+| `-b, --body <text>` | no | Commit body paragraph, repeatable. Each `-b` becomes its own paragraph, joined by a blank line; blank values are dropped. A value may contain real newlines (bash `$'...'`) |
 | `--breaking <description>` | no | Header becomes `type(scope)!: subject` and a `BREAKING CHANGE: <description>` footer is added |
 | `--trailer <"Key: value">` | no | Footer trailer, repeatable. Format `Token: value` (token: letters, digits, hyphens) |
 | `--dry-run` | no | Print the full message and run no git commands |
@@ -94,7 +94,8 @@ Pass `--type`, `--scope` and `--subject` and the CLI never prompts, with or with
 bunx --bun @alecsibilia/commit \
   --type feat --scope cli \
   --subject "add non-interactive flags" \
-  --body $'Agents can now commit without prompts.\n\nValues are validated against commit.config.ts.' \
+  --body "Agents can now commit without prompts." \
+  --body "Values are validated against commit.config.ts." \
   --trailer "Refs: #42" \
   --trailer "Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
@@ -112,7 +113,7 @@ Refs: #42
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
-Message layout: header, then a blank line and the body (if given), then a blank line and the footers (`BREAKING CHANGE` first, then trailers in the order given). The body is used as-is, so pass real newlines (e.g. bash `$'...'`). A literal `\n` is not converted.
+Message layout: header, then a blank line and the body (if given), then a blank line and the footers (`BREAKING CHANGE` first, then trailers in the order given). Like `git commit -m`, `--body` can be given more than once: each value is its own paragraph, paragraphs are joined by one blank line, and blank values are dropped. Each value is used as-is, so pass real newlines inside a paragraph with e.g. bash `$'...'`. A literal `\n` is not converted.
 
 **Validation.** `--type` and `--scope` are checked against `commit.config.ts`. An unknown value fails and lists the allowed ones, e.g. `✗ Unknown type "foo". Allowed: feat, fix, docs`. Empty subjects and malformed trailers are rejected too.
 
@@ -141,6 +142,7 @@ const result = await commit({
   type: 'feat',
   scope: 'cli',
   subject: 'add non-interactive flags',
+  body: ['First paragraph.', 'Second paragraph.'], // or a single string
   trailers: ['Co-Authored-By: Claude <noreply@anthropic.com>'],
   interactive: false, // defaults to process.stdin.isTTY
 })

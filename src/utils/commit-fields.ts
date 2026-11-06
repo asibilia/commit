@@ -8,7 +8,7 @@ export interface CommitFieldsInput {
     type?: string
     scope?: string
     subject?: string
-    body?: string
+    body?: string | string[]
     breaking?: string
     trailers?: string[]
 }

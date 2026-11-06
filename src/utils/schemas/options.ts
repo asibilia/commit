@@ -7,6 +7,8 @@ import { z } from 'zod'
  * session is interactive, otherwise `commit()` fails with a list of the
  * missing flags.
  *
+ * `body` is a string or an array of paragraphs (joined by blank lines).
+ *
  * `interactive` defaults to whether stdin is a TTY at parse time.
  */
 export const CommitOptionsSchema = z.object({
@@ -15,7 +17,7 @@ export const CommitOptionsSchema = z.object({
     type: z.string().optional(),
     scope: z.string().optional(),
     subject: z.string().optional(),
-    body: z.string().optional(),
+    body: z.union([z.string(), z.array(z.string())]).optional(),
     breaking: z.string().optional(),
     trailers: z.array(z.string()).default([]),
     interactive: z.boolean().default(() => Boolean(process.stdin.isTTY)),
@@ -34,7 +36,7 @@ export const CliOptionsSchema = z
         type: z.string().optional(),
         scope: z.string().optional(),
         subject: z.string().optional(),
-        body: z.string().optional(),
+        body: z.array(z.string()).optional(),
         breaking: z.string().optional(),
         trailer: z.array(z.string()).default([]),
     })
